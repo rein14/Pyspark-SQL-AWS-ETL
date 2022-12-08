@@ -14,9 +14,9 @@ conf = (
 sc = SparkContext.getOrCreate(conf=conf)
 etl = SparkSession(sc)
 
-
 with open("config.json") as content:
     config = json.load(content)
+
 
 # Credentials and db details
 pwd = os.environ["PGPASS"]
@@ -26,6 +26,7 @@ src_db = config["src_db"]
 target_db = config["target_db"]
 src_driver = config["src_driver"]
 target_driver = config["target_driver"]
+
 
 # source connection
 src_url = f"jdbc:sqlserver://{server}:1433;databaseName={src_db};user={uid};password={pwd};encrypt=true;trustServerCertificate=true;"
@@ -73,4 +74,10 @@ def extract():
 
 
 if __name__ == "__main__":
-  print(config["target_driver"])
+    print("extracting")
+    extract()
+
+    transform.tranform_prd()
+    transform.transform_ProductCategory()
+    transform.transform_SubProductCategory()
+    transform.tranform_prd()
