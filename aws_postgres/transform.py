@@ -18,11 +18,6 @@ uid = os.environ["PGUID"]
 target_url = f"jdbc:postgresql://{server}:5432/{target_db}?user={uid}&password={pwd}"
 
 
-def drop_table():
-    tables = ["stg_DimProductCategory", "stg_Product", "stg_DimProductSubCategory"]
-    for table in tables:  
-        etl.sql(f"drop table if exists {table}")
-
     
 def transform_product():
     """
@@ -37,7 +32,7 @@ def transform_product():
         .option("dbtable", "src_dimproduct")
         .load()
     )
-
+    # cleaning table
     revised = df.select(
         "ProductKey",
         "ProductAlternateKey",
@@ -81,7 +76,7 @@ def transform_product():
             "EndDate":"N/A"
         }
     ).withColumnRenamed("EnglishDescription","Description").withColumnRenamed("EnglishProductName", "ProductName")
-
+    #save data to table
     revised.write.format("jdbc").option("url", target_url).option(
         "driver", target_driver
     ).option("dbtable", "src_dimproducts").mode("overwrite").save()
@@ -101,14 +96,14 @@ def transform_ProductCategory():
             .option("dbtable", "src_DimProductCategory")
             .load()
         )
-
+    # cleaning table
     revised = df.select(
         'ProductCategoryKey', 'ProductCategoryAlternateKey','EnglishProductCategoryName').withColumnRenamed("EnglishProductCategoryName", "ProductSubcategoryName")
             # .withColumn("isGraduated",col("isGraduated").cast(IntegerType()))
     # revised = revised.withColumn("ProductCategoryKey", revised.ProductCategoryKey.cast('float'))
     print("transforming stg_DimProductCategory")
 
-
+    # save dataframe to table
     revised.write.format("jdbc").option("url", target_url).option(
         "driver", target_driver
     ).option("dbtable", "stg_DimProductCategory").mode("overwrite").save()
@@ -128,8 +123,10 @@ def transform_SubProductCategory():
             .option("dbtable", "src_DimSubProductCategory")
             .load()
         )
+    # cleaning table
     revised = df.select('ProductSubcategoryKey','EnglishProductSubcategoryName', 'ProductSubcategoryAlternateKey','EnglishProductSubcategoryName', 'ProductCategoryKey').withColumnRenamed("EnglishProductSubcategoryName","ProductSubcategoryName")
     print("Transforming src_DimSubProductCategory")
+    # save dataframe to table
     revised.write.format("jdbc").option("url", target_url).option(
         "driver", target_driver
     ).option("dbtable", "stg_DimSubProductCategory").mode("overwrite").save()
@@ -140,6 +137,7 @@ def tranform_prd():
     Merge tables product table on product category tables
     """
     print("Loading tables")
+    # load all three tables
     p = (
             etl.read.format("jdbc")
             .option("url", target_url)\
@@ -168,10 +166,11 @@ def tranform_prd():
             .option("dbtable", "stg_DimProductSubcategory")
             .load()
         )
-        
+    # create enfine
     engine = create_engine(f'postgresql://{uid}:{pwd}@{server}:5432/AdventureWorks')
     print("Tranforming: merging dat")
     new = p.toPandas().merge(ps.toPandas(), on='ProductSubcategoryKey').merge(pc.toPandas(), on='ProductCategoryKey')
     print("done")
+    # save dataframe to table
     new.to_sql(f'prd_DimProductCategory', engine, if_exists='replace', index=False)
         
