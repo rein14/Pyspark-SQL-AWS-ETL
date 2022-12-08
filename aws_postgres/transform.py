@@ -3,27 +3,20 @@ import os
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext
 from sqlalchemy import create_engine
+from config.spark_conf import etl
 
-with open("config.json") as f:
+
+with open("config/config.json") as f:
     config = json.load(f)
 
  
 target_driver = config["target_driver"]
 target_db = "AdventureWorks"
 server = "localhost"
-
 pwd = os.environ["PGPASS"]
 uid = os.environ["PGUID"]
 target_url = f"jdbc:postgresql://{server}:5432/{target_db}?user={uid}&password={pwd}"
 
-conf = (
-    SparkConf()
-    .setAppName("ETLPipeline")
-    .setMaster("local")
-    .set("spark.driver.extraClassPath", "c:/pyspark/*")
-)
-sc = SparkContext.getOrCreate(conf=conf)
-etl = SparkSession(sc)
 
 def drop_table():
     tables = ["stg_DimProductCategory", "stg_Product", "stg_DimProductSubCategory"]

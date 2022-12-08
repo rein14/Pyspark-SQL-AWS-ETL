@@ -1,20 +1,11 @@
-from pyspark import SparkContext, SparkConf
-from pyspark.sql import SparkSession, SQLContext
 import os
 from pyspark.sql.functions import *
 from aws_postgres import load, transform
 import json
+from config.spark_conf import etl
 
-conf = (
-    SparkConf()
-    .setAppName("ETLPipeline")
-    .setMaster("local")
-    .set("spark.driver.extraClassPath", "c:/pyspark/*")
-)
-sc = SparkContext.getOrCreate(conf=conf)
-etl = SparkSession(sc)
 
-with open("config.json") as content:
+with open("config/config.json") as content:
     config = json.load(content)
 
 
@@ -32,7 +23,6 @@ target_driver = config["target_driver"]
 src_url = f"jdbc:sqlserver://{server}:1433;databaseName={src_db};user={uid};password={pwd};encrypt=true;trustServerCertificate=true;"
 # target connection
 target_url = f"jdbc:postgresql://{server}:5432/{target_db}?user={uid}&password={pwd}"
-
 
 
 def extract():
@@ -77,7 +67,7 @@ if __name__ == "__main__":
     print("extracting")
     extract()
 
-    transform.tranform_prd()
-    transform.transform_ProductCategory()
-    transform.transform_SubProductCategory()
-    transform.tranform_prd()
+    # transform.tranform_prd()
+    # transform.transform_ProductCategory()
+    # transform.transform_SubProductCategory()
+    # transform.tranform_prd()

@@ -51,8 +51,7 @@ def postgres(df, tbl,uid, pwd, target_url, target_driver):
         df.write.mode("overwrite").format("jdbc").option("url", target_url).option(
             "user", uid
         ).option("password", pwd).option("driver", target_driver).option(
-            "dbtable", "src_" + tbl
-        ).save()
+            "dbtable", "src_" + tbl)
         print("Data imported successful")
     except Exception as e:
         print("Data load error: " + str(e))
