@@ -11,14 +11,16 @@ with open("config/config.json") as f:
 
  
 target_driver = config["target_driver"]
-target_db = "AdventureWorks"
-server = "localhost"
+target_db = config["target_db"]
+server = config["server"]
 pwd = os.environ["PGPASS"]
 uid = os.environ["PGUID"]
 target_url = f"jdbc:postgresql://{server}:5432/{target_db}?user={uid}&password={pwd}"
 
 
-    
+# decide where to transform data into warehouse
+
+
 def transform_product():
     """
     Transform Product Table
@@ -169,8 +171,9 @@ def tranform_prd():
     # create enfine
     engine = create_engine(f'postgresql://{uid}:{pwd}@{server}:5432/AdventureWorks')
     print("Tranforming: merging dat")
-    new = p.toPandas().merge(ps.toPandas(), on='ProductSubcategoryKey').merge(pc.toPandas(), on='ProductCategoryKey')
+    new = p.to_pandas_on_spark().merge(ps. to_pandas_on_spark(), on='ProductSubcategoryKey').merge(pc.to_pandas_on_spark(), on='ProductCategoryKey')
     print("done")
     # save dataframe to table
-    new.to_sql(f'prd_DimProductCategory', engine, if_exists='replace', index=False)
+    # new.to_sql(f'prd_DimProductCategory', engine, if_exists='replace', index=False)
+    new.write
         

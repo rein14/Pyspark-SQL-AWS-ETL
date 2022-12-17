@@ -37,7 +37,7 @@ def extract():
             etl.read.format("jdbc")
             .options(driver=src_driver, user=uid, password=pwd, url=src_url, query=SQL)
             .load()
-)
+            )
         # get table names
         data_collect = data.collect()
         # looping thorough each row of the dataframe

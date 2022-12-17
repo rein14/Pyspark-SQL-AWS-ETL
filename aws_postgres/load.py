@@ -1,10 +1,11 @@
 import json
 import boto3, io
 import logging
+from utils import get_aws
+from dataclasses import asdict
 
 
-
-def aws(df, tbl,access_key, secret_key):
+def aws(df, tbl):
     """
     Load data to aws
     """
@@ -17,10 +18,7 @@ def aws(df, tbl,access_key, secret_key):
         upload_file_key = "public/" + str(tbl) + f"/{str(tbl)}"
         filepath = upload_file_key + ".csv"
         s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=access_key,
-            aws_secret_access_key=secret_key,
-            region_name="us-east-1",
+            "s3", **asdict(get_aws)
         )
         with io.StringIO() as csv_buffer:
             df.toPandas().to_csv(csv_buffer)
@@ -32,9 +30,9 @@ def aws(df, tbl,access_key, secret_key):
             status = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
 
             if status == 200:
-                logging.debug(f"Successful S3 put_object response. Status - {status}")
+                print(f"Successful S3 put_object response. Status - {status}")
             else:
-                logging.debug(f"Unsuccessful S3 put_object response. Status - {status}")
+                print(f"Unsuccessful S3 put_object response. Status - {status}")
                 print("Data imported successful")
     except Exception as e:
         print("Data load error: " + str(e))
