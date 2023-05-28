@@ -3,6 +3,6 @@ End to end data engineering where I extract data, do some tranformations on  the
 is loaded to our database and AWS simoulteneously.
 
 ## Requirements
-pyspark
-airflow
-sqlalchemy
+* pyspark
+* sqlalchemy
+* boto3
